@@ -4,7 +4,7 @@
     "description": "Image generation and social media upload client for Node.js",
     "main": "index.js",
     "scripts": {
-        "image": "npx tsx imageGeneration.ts"
+        "imageUpload": "npx tsx main.ts"
     },
     "keywords": [
         "openai",
@@ -21,7 +21,8 @@
     "dependencies": {
         "@atproto/api": "^0.15.26",
         "dotenv": "^16.5.0",
-        "openai": "^5.0.1"
+        "openai": "^5.0.1",
+        "sharp": "^0.34.3"
     },
     "devDependencies": {
         "@types/node": "^22.15.29"

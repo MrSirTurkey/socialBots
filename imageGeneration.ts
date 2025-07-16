@@ -117,16 +117,44 @@ function generateScenicPrompt() {
     return prompt;
 }
 
-export async function generateImage(filename?: string) {
-    // Get filename from parameter or use default
-    // Generate random filename using current timestamp if not provided
-    if (!filename) {
-        const timestamp = new Date().toISOString().replace(/[:.-]/g, "");
-        // Random string
-        filename = `${timestamp}_${Math.random().toString(36).substring(2, 8)}_image.png`;
+async function cleanPrompt(prompt: string) {
+    // Get ChatGPT to revise the prompt
+    return client.chat.completions.create({
+        model: "gpt-4.1-nano",
+        messages: [
+            {
+                role: "system",
+                content: "You are a helpful assistant that improves the detail of desktop background image prompts. You will respond ONLY with an adjusted version of the prompt, perfect for Dall-E 3 image generation, as well as two ampersands (&&) followed by a short series of space-separated hashtags that describe the image in a concise way. Do not include #ai, #image, #background, #ai-background, or #ai-image in the hashtags."
+            },
+            {
+                role: "user",
+                content: `Revise this prompt for a Dall-E 3 background image to be more clear with more detail: "${prompt}"`
+            }
+        ],
+        max_completion_tokens: 150,
+        temperature: 0.5
+    }).then(response => {
+        const message = response.choices[0]?.message;
+        return message && message.content ? message.content.trim() : "";
+    });
+}
+
+export async function generateImage() {
+
+    const promptSections = await cleanPrompt(Math.random() < 0.5 ? generateCharacterPrompt() : generateScenicPrompt());
+
+    if (!promptSections) {
+        throw new Error("Failed to generate a valid prompt. Please try again.");
     }
 
-    const prompt = Math.random() < 0.5 ? generateCharacterPrompt() : generateScenicPrompt();
+    const [prompt, hashtags] = promptSections.split("&&").map(part => part.trim());
+    console.log("Generated prompt:", prompt);
+    console.log("Generated hashtags:", hashtags);
+
+    //CASE: prompt is empty
+    if (!prompt) {
+        throw new Error("Generated prompt is empty. Please try again.");
+    }
 
     const systemInstruction = "Create a visual image only. DO NOT modify this prompt. DO NOT add text, words, letters, typography, labels, signs, or writing of any kind in the image. Render exactly as described. The image should be purely visual with no readable text elements whatsoever: ";
 
@@ -140,11 +168,9 @@ export async function generateImage(filename?: string) {
         quality: "hd"
     });
 
-    console.log("Image generation response:", img);
-
     if (!img.data || img.data.length === 0 || !img.data[0].b64_json) {
         throw new Error("No image data returned from OpenAI API");
     }
 
-    return img.data[0].b64_json;
+    return {imageB64: img.data[0].b64_json, hashtags: hashtags};
 }

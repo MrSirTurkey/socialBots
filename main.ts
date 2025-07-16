@@ -1,7 +1,14 @@
 import { generateImage } from "./imageGeneration";
+import { blueskyImageUpload } from "./bskyUpload";
 
 async function main() {
-    const imageB64 = await generateImage();
+    const { imageB64, hashtags } = await generateImage();
+
+    if (!imageB64) {
+        throw new Error("Image generation failed, no image data returned.");
+    }
+
+    await blueskyImageUpload(imageB64, hashtags);
 }
 
 main()
