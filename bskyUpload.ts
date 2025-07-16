@@ -5,7 +5,7 @@ dotenv.config();
 
 const MAX_SIZE = 1000000; // 976.56KB in bytes
 
-export async function blueskyImageUpload(imageB64: string, text?: string) {
+export async function blueskyImageUpload(imageB64: string, hashtags?: string) {
     const agent = new BskyAgent({
         service: 'https://bsky.social',
     });
@@ -15,7 +15,7 @@ export async function blueskyImageUpload(imageB64: string, text?: string) {
     }
 
     await agent.login({ identifier: process.env.BSKY_USERNAME, password: process.env.BSKY_PASSWORD });
-    
+
     // Convert base64 to Buffer
     let imageBuffer = Buffer.from(imageB64, 'base64');
 
@@ -41,17 +41,45 @@ export async function blueskyImageUpload(imageB64: string, text?: string) {
         encoding: 'image/png',
     });
 
-    const postText = text || '';
+    // Ensure hashtags are formatted correctly
+    if (hashtags) {
+        hashtags = hashtags.replace(/#/g, '').trim().split(/\s+/).map(tag => `#${tag}`).join(' ');
+    }
+
+    const text = "#ai #image #background #aiBackground #aiImage " + (hashtags ? hashtags : "");
+    const hashtagRegex = /#\w+/g;
+    const facets: Array<{
+        index: { byteStart: number; byteEnd: number };
+        features: Array<{
+            $type: string;
+            tag: string;
+        }>;
+    }> = [];
+
+    let match: RegExpExecArray | null;
+    while ((match = hashtagRegex.exec(text)) !== null) {
+        facets.push({
+            index: {
+                byteStart: match.index,
+                byteEnd: match.index + match[0].length
+            },
+            features: [{
+                $type: 'app.bsky.richtext.facet#tag',
+                tag: match[0].split('#')[1]
+            }]
+        });
+    }
 
     await agent.post({
-        text: "#ai #image #ai-image #background #ai-background " + postText,
+        text: text,
         embed: {
             $type: 'app.bsky.embed.images',
             images: [{
                 image: uploadRes.data.blob,
-                alt: postText
+                alt: hashtags || "Generated image"
             }]
         },
+        facets,
         createdAt: new Date().toISOString(),
     })
 }

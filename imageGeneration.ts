@@ -124,7 +124,7 @@ async function cleanPrompt(prompt: string) {
         messages: [
             {
                 role: "system",
-                content: "You are a helpful assistant that improves the detail of desktop background image prompts. You will respond ONLY with an adjusted version of the prompt, perfect for Dall-E 3 image generation, as well as two ampersands (&&) followed by a short series of space-separated hashtags that describe the image in a concise way. Do not include #ai, #image, #background, #ai-background, or #ai-image in the hashtags."
+                content: "You are a helpful assistant that improves the detail of desktop background image prompts. You will respond ONLY with an adjusted version of the prompt, perfect for Dall-E 3 image generation, as well as two ampersands (&&) followed by a short series of hashtags that describe the image in a concise way. Different hashtags should be space-separated, multi-word hashtags should be in camelCase. Do not include #ai, #image, #background, #aiBackground, or #aiImage in the hashtags."
             },
             {
                 role: "user",
@@ -141,7 +141,7 @@ async function cleanPrompt(prompt: string) {
 
 export async function generateImage() {
 
-    const promptSections = await cleanPrompt(Math.random() < 0.5 ? generateCharacterPrompt() : generateScenicPrompt());
+    const promptSections = await cleanPrompt(Math.random() < 0.3 ? generateCharacterPrompt() : generateScenicPrompt());
 
     if (!promptSections) {
         throw new Error("Failed to generate a valid prompt. Please try again.");
