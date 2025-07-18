@@ -1,5 +1,6 @@
 import { generateImage } from "./imageGeneration";
 import { blueskyImageUpload } from "./bskyUpload";
+import { saveB64Image } from "./utility/fileHelper";
 
 async function main() {
     const { imageB64, hashtags } = await generateImage();
@@ -8,6 +9,10 @@ async function main() {
         throw new Error("Image generation failed, no image data returned.");
     }
 
+    // Save a local copy of the image
+    saveB64Image(imageB64);
+
+    // Upload the image to Bluesky
     await blueskyImageUpload(imageB64, hashtags);
 }
 
