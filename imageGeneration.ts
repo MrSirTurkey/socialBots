@@ -20,7 +20,7 @@ import {
     settings,
     viewSubjects,
     viewTypes
-} from "./consts";
+} from "./utility/promptSections";
 
 const client = new OpenAI();
 

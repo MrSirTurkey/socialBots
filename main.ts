@@ -9,8 +9,11 @@ async function main() {
         throw new Error("Image generation failed, no image data returned.");
     }
 
-    // Save a local copy of the image
-    saveB64Image(imageB64);
+    // Optional: Check if local file saving is enabled
+    if(process.env.SAVE_LOCAL_FILE && process.env.SAVE_LOCAL_FILE === 'true') {
+        // Save a local copy of the image
+        saveB64Image(imageB64);
+    }
 
     // Upload the image to Bluesky
     await blueskyImageUpload(imageB64, hashtags);
