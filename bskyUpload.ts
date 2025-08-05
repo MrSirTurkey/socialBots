@@ -18,6 +18,7 @@ export async function blueskyImageUpload(imageB64: string, hashtags?: string) {
 
     // Convert base64 to Buffer
     let imageBuffer = Buffer.from(imageB64, 'base64');
+    let encoding = 'image/png';
 
     // Compress if too large
     if (imageBuffer.length > MAX_SIZE) {
@@ -33,12 +34,36 @@ export async function blueskyImageUpload(imageB64: string, hashtags?: string) {
                 .png({ quality })
                 .toBuffer();
         }
-        imageBuffer = compressed;
+
+        // If still too large, try JPEG
+        if (compressed.length > MAX_SIZE) {
+            quality = 90;
+            compressed = await sharp(imageBuffer)
+                .jpeg({ quality })
+                .toBuffer();
+
+            while (compressed.length > MAX_SIZE && quality > 10) {
+                quality -= 10;
+                compressed = await sharp(imageBuffer)
+                    .jpeg({ quality })
+                    .toBuffer();
+            }
+
+            // If JPEG is smaller, use it
+            if (compressed.length <= MAX_SIZE) {
+                imageBuffer = compressed;
+                encoding = 'image/jpeg';
+            } else {
+                throw new Error(`Image could not be compressed below ${MAX_SIZE} bytes.`);
+            }
+        } else {
+            imageBuffer = compressed;
+        }
     }
 
     // Upload image
     const uploadRes = await agent.uploadBlob(imageBuffer, {
-        encoding: 'image/png',
+        encoding: encoding,
     });
 
     // Ensure hashtags are formatted correctly
