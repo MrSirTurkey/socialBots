@@ -71,7 +71,7 @@ export async function blueskyImageUpload(imageB64: string, hashtags?: string) {
         hashtags = hashtags.replace(/#/g, '').trim().split(/\s+/).map(tag => `#${tag}`).join(' ');
     }
 
-    const text = "#ai #image #background #aiBackground #aiImage " + (hashtags ? hashtags : "");
+    const text = "#ai #image #background #aiBackground #aiImage #aiArt " + (hashtags ? hashtags : "");
     const hashtagRegex = /#\w+/g;
     const facets: Array<{
         index: { byteStart: number; byteEnd: number };
@@ -101,7 +101,7 @@ export async function blueskyImageUpload(imageB64: string, hashtags?: string) {
             $type: 'app.bsky.embed.images',
             images: [{
                 image: uploadRes.data.blob,
-                alt: hashtags || "Generated image"
+                alt: text || "Generated image"
             }]
         },
         facets,

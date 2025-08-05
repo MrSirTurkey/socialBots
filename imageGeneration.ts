@@ -128,7 +128,7 @@ async function cleanPrompt(prompt: string) {
                 content: `You are a helpful assistant that improves the detail of desktop background image prompts. 
                     You will respond ONLY with an adjusted version of the prompt, perfect for Dall-E 3 image generation, as well as two ampersands (&&) followed by a short series of hashtags that describe the image in a concise way. 
                     Different hashtags should be space-separated, multi-word hashtags should be in camelCase. 
-                    Do not include #ai, #image, #background, #aiBackground, or #aiImage in the hashtags.`
+                    Do not include #ai, #image, #background, #aiBackground, #aiImage, or #aiArt in the hashtags.`
             },
             {
                 role: "user",
